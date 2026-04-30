@@ -25,7 +25,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=128)
     surname = models.CharField(max_length=128)
     avatar = models.ImageField(upload_to="avatars/", blank=True)
-    phone = PhoneNumberField(unique=True, region=None, blank=True, null=True)
+    phone = PhoneNumberField(unique=True, null=True, blank=True)
     github_url = models.URLField(blank=True, default="")
     about = models.TextField(max_length=256, blank=True, default="")
     is_active = models.BooleanField(default=True)
