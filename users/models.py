@@ -1,6 +1,10 @@
 from django.db import models
+from django.core.files.base import ContentFile
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from phonenumber_field.modelfields import PhoneNumberField
+from PIL import Image, ImageDraw, ImageFont
+from random import randint
+import io
 
 
 class UserManager(BaseUserManager):
@@ -18,6 +22,37 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
         return self.create_user(email, name, surname, password, **extra_fields)
+
+def make_goddamn_avatar(letter):
+    m = 125
+    x = randint(0, 765)
+    
+    k = (255 - m) / 255
+    r = int(max(0, abs(x - 382) - 127) * k + m)
+    g = int(max(0, 255 - abs(x - 255)) * k + m)
+    b = int(max(0, 255 - abs(x - 510)) * k + m)
+    
+    size = 128
+    img = Image.new("RGB", (size, size), color=(r, g, b))
+    draw = ImageDraw.Draw(img)
+    try:
+        font = ImageFont.truetype("arial.ttf", size=size//2)
+    except OSError:
+        font = ImageFont.load_default(size=size//2)
+    textbox = draw.textbbox((0, 0), letter, font=font)
+    text_w = textbox[2] - textbox[0]
+    text_h = textbox[3] - textbox[1]
+    x = (size - text_w) / 2 - textbox[0]
+    y = (size - text_h) / 2 - textbox[1]
+    draw.text(
+        (x, y), letter, 
+        fill="black", font=font,
+        stroke_width=3,
+        stroke_fill="white"
+    )
+    buffer = io.BytesIO()
+    img.save(buffer, format="JPEG")
+    return ContentFile(buffer.getvalue())
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -46,6 +81,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         super().save(*args, **kwargs)
+        if is_new and not self.avatar:
+            letter = self.name[0].upper()
+            avatar_image = make_goddamn_avatar(letter)
+            self.avatar.save(f"avatar_{self.pk}.png", avatar_image, save=True)
     
     @property
     def formatted_phone(self):
