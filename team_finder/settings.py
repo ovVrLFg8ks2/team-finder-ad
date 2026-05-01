@@ -21,8 +21,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "user",
+    "users",
+    "phonenumber_field",
 ]
+
+PHONENUMBER_DEFAULT_REGION = "RU"
+PHONENUMBER_DB_FORMAT = "E164"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -118,4 +122,4 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "user.User"
+AUTH_USER_MODEL = "users.User"

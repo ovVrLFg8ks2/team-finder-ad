@@ -29,7 +29,7 @@
                     <span>{% include 'includes/svg/email.html' %} {{ user.email }}</span>
                     {% endif %}
                     {% if user.phone %}
-                    <span>{% include 'includes/svg/phone.html' %} {{ user.phone }}</span>
+                    <span>{% include 'includes/svg/phone.html' %} {{ user.formatted_phone  }}</span>
                     {% endif %}
                     {% if user.github_url %}
                     <span>{% include 'includes/svg/github.html' %}

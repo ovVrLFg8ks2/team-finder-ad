@@ -46,3 +46,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         super().save(*args, **kwargs)
+    
+    @property
+    def formatted_phone(self):
+        if not self.phone:
+            return ""
+        return self.phone.as_national.replace('8 ', '+7 ', 1) if self.phone.as_national.startswith('8 ') else self.phone.as_national
