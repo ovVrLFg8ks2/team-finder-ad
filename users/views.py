@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+from django.core.paginator import Paginator
 
 from .forms import RegistrationForm, LoginForm, EditProfileForm, ChangePasswordForm
 from .models import User
@@ -70,3 +71,34 @@ def change_password(request):
     else:
         form = ChangePasswordForm(request.user)
     return render(request, "users/change_password.html", {"form": form})
+    
+    
+def paginate(request, queryset, per_page=12):
+    paginator = Paginator(queryset, per_page)
+    page_number = request.GET.get("page")
+    return paginator.get_page(page_number)
+
+
+def user_list(request):
+    active_filter = request.GET.get("filter")
+    queryset = User.objects.all().order_by("-id")
+    
+    ''' ! setup projects first !
+    if active_filter == 'owners-of-favorite-projects':
+        queryset = queryset.filter(projects__favorites__user=request.user).distinct()
+    elif active_filter == 'owners-of-participating-projects':
+        queryset = queryset.filter(projects__participants=request.user).distinct()
+    elif active_filter == 'interested-in-my-projects':
+        queryset = queryset.filter(projects__participants=request.user).distinct()
+    elif active_filter == 'participants-of-my-projects':
+        queryset = queryset.filter(projects__participants=request.user).distinct()
+    '''
+    
+    return render(
+        request,
+        "users/participants.html",
+        {
+            "participants": paginate(request, queryset),
+            "active_filter": active_filter,
+        },
+    )
