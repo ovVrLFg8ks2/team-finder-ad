@@ -7,6 +7,16 @@ from random import randint
 import io
 
 
+class Skill(models.Model):
+    name = models.CharField(max_length=124, null=False, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email, name, surname, password=None, **extra_fields):
         if not email:
@@ -23,7 +33,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_active", True)
         return self.create_user(email, name, surname, password, **extra_fields)
 
-def make_goddamn_avatar(letter):
+def make_avatar(letter):
     m = 125
     x = randint(0, 765)
     
@@ -65,7 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     about = models.TextField(max_length=256, blank=True, default="")
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    skills = models.CharField(max_length=1024)
+    skills = models.ManyToManyField(Skill, null=True, blank=True, related_name="users")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name", "surname"]
@@ -83,7 +93,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         super().save(*args, **kwargs)
         if is_new and not self.avatar:
             letter = self.name[0].upper()
-            avatar_image = make_goddamn_avatar(letter)
+            avatar_image = make_avatar(letter)
             self.avatar.save(f"avatar_{self.pk}.png", avatar_image, save=True)
     
     @property

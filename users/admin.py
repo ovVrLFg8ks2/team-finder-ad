@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User
+from .models import User, Skill
 
 
 @admin.register(User)
@@ -16,6 +16,7 @@ class UserAdmin(BaseUserAdmin):
             "Personal info",
             {"fields": ("name", "surname", "avatar", "phone", "github_url", "about")},
         ),
+        ("Skills", {"fields": ("skills",)}),
         (
             "Permissions",
             {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
@@ -31,3 +32,9 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
     filter_horizontal = ("groups", "user_permissions")
+
+
+@admin.register(Skill)
+class SkillAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)

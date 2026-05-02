@@ -1,10 +1,14 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET, require_POST
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
+from django.http import JsonResponse
+from http import HTTPStatus
+import json
 
 from .forms import RegistrationForm, LoginForm, EditProfileForm, ChangePasswordForm
-from .models import User
+from .models import User, Skill
 
 
 def user_detail(request, user_id):
@@ -103,3 +107,53 @@ def user_list(request):
             "active_filter": active_filter,
         },
     )
+
+
+@require_GET
+def skill_autocomplete(request):
+    q = request.GET.get("q", "").strip()
+    skills = Skill.objects.filter(name__istartswith=q).order_by("name")#[:10]
+    data = list(skills.values("id", "name"))
+    return JsonResponse(data, safe=False)
+
+
+@login_required
+@require_POST
+def add_user_skill(request, user_id):
+    if request.user.pk != user_id:
+        return JsonResponse({"error": "Forbidden"}, status=HTTPStatus.FORBIDDEN)
+    try:
+        data = json.loads(request.body)
+        skill_id = data.get("skill_id")
+        skill_name = data.get("name")
+
+        if skill_id:
+            skill = get_object_or_404(Skill, pk=skill_id)
+        elif skill_name:
+            # Создаем навык, если его нет, или берем существующий
+            skill, created = Skill.objects.get_or_create(name=skill_name.strip())
+        else:
+            return JsonResponse({"error": "No skill data provided"}, status=HTTPStatus.BAD_REQUEST)
+
+        # Добавляем навык пользователю (M2M связь)
+        request.user.skills.add(skill)
+        
+        return JsonResponse({
+            "id": skill.id,
+            "name": skill.name
+        }, status=HTTPStatus.OK)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=HTTPStatus.BAD_REQUEST)
+
+
+@login_required
+@require_POST
+def remove_user_skill(request, user_id, skill_id):
+    if request.user.pk != user_id:
+        return JsonResponse({"error": "Forbidden"}, status=HTTPStatus.FORBIDDEN)
+    skill = get_object_or_404(Skill, pk=skill_id)
+    if not request.user.skills.filter(pk=skill_id).exists():
+        return JsonResponse({"error": "Skill not in user profile"}, status=HTTPStatus.BAD_REQUEST)
+    request.user.skills.remove(skill)
+    return JsonResponse({"status": "ok"})
