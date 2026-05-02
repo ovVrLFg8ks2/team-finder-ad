@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "users",
     "phonenumber_field",
+    "projects",
 ]
 
 PHONENUMBER_DEFAULT_REGION = "RU"

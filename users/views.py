@@ -83,16 +83,17 @@ def user_list(request):
     active_filter = request.GET.get("filter")
     queryset = User.objects.all().order_by("-id")
     
-    ''' ! setup projects first !
-    if active_filter == 'owners-of-favorite-projects':
-        queryset = queryset.filter(projects__favorites__user=request.user).distinct()
-    elif active_filter == 'owners-of-participating-projects':
-        queryset = queryset.filter(projects__participants=request.user).distinct()
-    elif active_filter == 'interested-in-my-projects':
-        queryset = queryset.filter(projects__participants=request.user).distinct()
-    elif active_filter == 'participants-of-my-projects':
-        queryset = queryset.filter(projects__participants=request.user).distinct()
-    '''
+    if request.user.is_authenticated:
+        if active_filter == 'owners-of-favorite-projects':
+            queryset = queryset.filter(owned_projects__favorites__user=request.user)
+        elif active_filter == 'owners-of-participating-projects':
+            queryset = queryset.filter(owned_projects__participants=request.user)
+        elif active_filter == 'interested-in-my-projects':
+            queryset = queryset.filter(favorite_projects__owner=request.user)
+        elif active_filter == 'participants-of-my-projects':
+            queryset = queryset.filter(participated_projects__owner=request.user)
+    
+    queryset = queryset.distinct()
     
     return render(
         request,
