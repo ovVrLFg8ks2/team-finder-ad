@@ -46,9 +46,8 @@ def login_view(request):
 
 
 def logout_view(request):
-    user = request.user
     logout(request)
-    return redirect("users:user_detail", user_id=user.id)
+    return redirect("projects:project_list")
 
 
 @login_required

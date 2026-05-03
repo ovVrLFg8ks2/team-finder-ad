@@ -1,10 +1,12 @@
 from django.db import models
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from phonenumber_field.modelfields import PhoneNumberField
 from PIL import Image, ImageDraw, ImageFont
 from random import randint
 import io
+import os
 
 
 class Skill(models.Model):
@@ -46,7 +48,8 @@ def make_avatar(letter):
     img = Image.new("RGB", (size, size), color=(r, g, b))
     draw = ImageDraw.Draw(img)
     try:
-        font = ImageFont.truetype("arial.ttf", size=size//2)
+        font_path = os.path.join(settings.BASE_DIR, 'static', 'fonts', 'Neue_Haas_Grotesk_Display_Pro_75_Bold.otf')
+        font = ImageFont.truetype(font_path, size=size//2)
     except OSError:
         font = ImageFont.load_default(size=size//2)
     textbox = draw.textbbox((0, 0), letter, font=font)
@@ -94,7 +97,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         if is_new and not self.avatar:
             letter = self.name[0].upper()
             avatar_image = make_avatar(letter)
-            self.avatar.save(f"avatar_{self.pk}.png", avatar_image, save=True)
+            self.avatar.save(f"avatar_{self.pk}.jpg", avatar_image, save=True)
     
     @property
     def formatted_phone(self):
