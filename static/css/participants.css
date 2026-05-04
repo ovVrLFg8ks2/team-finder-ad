@@ -87,6 +87,8 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 10px;
+	display: flex;
+    align-items: center;
 }
 
 .filter-chip {

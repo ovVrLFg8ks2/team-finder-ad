@@ -83,18 +83,13 @@ def paginate(request, queryset, per_page=12):
 
 
 def user_list(request):
-    active_filter = request.GET.get("filter")
     queryset = User.objects.all().order_by("-id")
 
-    if request.user.is_authenticated:
-        if active_filter == 'owners-of-favorite-projects':
-            queryset = queryset.filter(owned_projects__favorites__user=request.user)
-        elif active_filter == 'owners-of-participating-projects':
-            queryset = queryset.filter(owned_projects__participants=request.user)
-        elif active_filter == 'interested-in-my-projects':
-            queryset = queryset.filter(favorite_projects__owner=request.user)
-        elif active_filter == 'participants-of-my-projects':
-            queryset = queryset.filter(participated_projects__owner=request.user)
+    active_filter = request.GET.get("skill", "").strip()
+    if active_filter:
+        queryset = queryset.filter(skills__name=active_filter)
+
+    skills = Skill.objects.all().order_by("name")
 
     queryset = queryset.distinct()
 
@@ -104,6 +99,7 @@ def user_list(request):
         {
             "participants": paginate(request, queryset),
             "active_filter": active_filter,
+            "skills": skills,
         },
     )
 
