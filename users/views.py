@@ -74,8 +74,8 @@ def change_password(request):
     else:
         form = ChangePasswordForm(request.user)
     return render(request, "users/change_password.html", {"form": form})
-    
-    
+
+
 def paginate(request, queryset, per_page=12):
     paginator = Paginator(queryset, per_page)
     page_number = request.GET.get("page")
@@ -85,7 +85,7 @@ def paginate(request, queryset, per_page=12):
 def user_list(request):
     active_filter = request.GET.get("filter")
     queryset = User.objects.all().order_by("-id")
-    
+
     if request.user.is_authenticated:
         if active_filter == 'owners-of-favorite-projects':
             queryset = queryset.filter(owned_projects__favorites__user=request.user)
@@ -95,9 +95,9 @@ def user_list(request):
             queryset = queryset.filter(favorite_projects__owner=request.user)
         elif active_filter == 'participants-of-my-projects':
             queryset = queryset.filter(participated_projects__owner=request.user)
-    
+
     queryset = queryset.distinct()
-    
+
     return render(
         request,
         "users/participants.html",
@@ -111,7 +111,7 @@ def user_list(request):
 @require_GET
 def skill_autocomplete(request):
     q = request.GET.get("q", "").strip()
-    skills = Skill.objects.filter(name__istartswith=q).order_by("name")#[:10]
+    skills = Skill.objects.filter(name__istartswith=q).order_by("name")
     data = list(skills.values("id", "name"))
     return JsonResponse(data, safe=False)
 
@@ -129,14 +129,12 @@ def add_user_skill(request, user_id):
         if skill_id:
             skill = get_object_or_404(Skill, pk=skill_id)
         elif skill_name:
-            # Создаем навык, если его нет, или берем существующий
             skill, created = Skill.objects.get_or_create(name=skill_name.strip())
         else:
             return JsonResponse({"error": "No skill data provided"}, status=HTTPStatus.BAD_REQUEST)
 
-        # Добавляем навык пользователю (M2M связь)
         request.user.skills.add(skill)
-        
+
         return JsonResponse({
             "id": skill.id,
             "name": skill.name

@@ -45,8 +45,8 @@ def edit_project(request, project_id):
     else:
         form = ProjectForm(instance=project)
     return render(request, "projects/create-project.html", {
-        "form": form, 
-        "is_edit": True, 
+        "form": form,
+        "is_edit": True,
         "project": project
     })
 

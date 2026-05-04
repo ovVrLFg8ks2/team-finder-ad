@@ -62,5 +62,29 @@
     {% else %}
     {% include 'includes/empty-project-card.html' with empty_title="Пока нет участников" empty_message="Попробуйте сбросить фильтр" button_link="/users/list" button_text="Сбросить" %}
     {% endif %}
+	
+	{% if participants.has_other_pages %}
+    <div class="pagination">
+        {% if participants.has_previous %}
+            <a href="?page={{ participants.previous_page_number }}">&laquo;</a>
+        {% else %}
+            <span class="disabled">&laquo;</span>
+        {% endif %}
+
+        {% for num in participants.paginator.page_range %}
+            {% if participants.number == num %}
+                <span class="current">{{ num }}</span>
+            {% elif num >= participants.number|add:"-2" and num <= participants.number|add:"2" %}
+                <a href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if participants.has_next %}
+            <a href="?page={{ participants.next_page_number }}">&raquo;</a>
+        {% else %}
+            <span class="disabled">&raquo;</span>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

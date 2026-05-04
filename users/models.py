@@ -35,30 +35,34 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_active", True)
         return self.create_user(email, name, surname, password, **extra_fields)
 
+
 def make_avatar(letter):
     m = 125
     x = randint(0, 765)
-    
+
     k = (255 - m) / 255
     r = int(max(0, abs(x - 382) - 127) * k + m)
     g = int(max(0, 255 - abs(x - 255)) * k + m)
     b = int(max(0, 255 - abs(x - 510)) * k + m)
-    
+
     size = 128
     img = Image.new("RGB", (size, size), color=(r, g, b))
     draw = ImageDraw.Draw(img)
     try:
-        font_path = os.path.join(settings.BASE_DIR, 'static', 'fonts', 'Neue_Haas_Grotesk_Display_Pro_75_Bold.otf')
-        font = ImageFont.truetype(font_path, size=size//2)
+        font_path = os.path.join(
+            settings.BASE_DIR, 'static', 'fonts',
+            'Neue_Haas_Grotesk_Display_Pro_75_Bold.otf'
+        )
+        font = ImageFont.truetype(font_path, size=size // 2)
     except OSError:
-        font = ImageFont.load_default(size=size//2)
+        font = ImageFont.load_default(size=size // 2)
     textbox = draw.textbbox((0, 0), letter, font=font)
     text_w = textbox[2] - textbox[0]
     text_h = textbox[3] - textbox[1]
     x = (size - text_w) / 2 - textbox[0]
     y = (size - text_h) / 2 - textbox[1]
     draw.text(
-        (x, y), letter, 
+        (x, y), letter,
         fill="black", font=font,
         stroke_width=3,
         stroke_fill="white"
@@ -90,7 +94,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.name} {self.surname} <{self.email}>"
-    
+
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         super().save(*args, **kwargs)
@@ -98,9 +102,12 @@ class User(AbstractBaseUser, PermissionsMixin):
             letter = self.name[0].upper()
             avatar_image = make_avatar(letter)
             self.avatar.save(f"avatar_{self.pk}.jpg", avatar_image, save=True)
-    
+
     @property
     def formatted_phone(self):
         if not self.phone:
             return ""
-        return self.phone.as_national.replace('8 ', '+7 ', 1) if self.phone.as_national.startswith('8 ') else self.phone.as_national
+        if self.phone.as_national.startswith('8 '):
+            return self.phone.as_national.replace('8 ', '+7 ', 1)
+        else:
+            return self.phone.as_national

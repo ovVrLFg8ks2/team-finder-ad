@@ -1,7 +1,5 @@
-import re
 from django import forms
 from django.core.exceptions import ValidationError
-from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from phonenumber_field.widgets import RegionalPhoneNumberWidget
 
 from .models import User
@@ -9,12 +7,12 @@ from .models import User
 
 class RegistrationForm(forms.ModelForm):
     password = forms.CharField(
-        label="Пароль", 
+        label="Пароль",
         widget=forms.PasswordInput()
     )
-    
+
     class Meta:
-        model = User    
+        model = User
         labels = {
             'name': 'Имя',
             'surname': 'Фамилия',
@@ -22,7 +20,7 @@ class RegistrationForm(forms.ModelForm):
             'password': 'Пароль',
         }
         fields = ['name', 'surname', 'email', 'password']
-    
+
     def clean_email(self):
         email = self.cleaned_data.get('email').lower()
         qs = User.objects.filter(email=email)
@@ -31,7 +29,7 @@ class RegistrationForm(forms.ModelForm):
         if qs.exists():
             raise ValidationError("Пользователь с таким email уже зарегистрирован")
         return email
-        
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
@@ -83,7 +81,6 @@ class EditProfileForm(forms.ModelForm):
         if qs.exists():
             raise forms.ValidationError("Этот номер уже занят")
         return phone
-
 
     def clean_github_url(self):
         url = self.cleaned_data.get("github_url", "").strip()
