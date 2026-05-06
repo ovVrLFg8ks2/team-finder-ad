@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from phonenumber_field.widgets import RegionalPhoneNumberWidget
+from team_finder.utils import validate_github_url
 
 from .models import User
 
@@ -50,6 +51,8 @@ class LoginForm(forms.Form):
 
 
 class EditProfileForm(forms.ModelForm):
+    github_url = forms.URLField(validators=[validate_github_url])
+
     class Meta:
         model = User
         fields = ["name", "surname", "avatar", "about", "phone", "github_url"]
@@ -81,14 +84,6 @@ class EditProfileForm(forms.ModelForm):
         if qs.exists():
             raise forms.ValidationError("Этот номер уже занят")
         return phone
-
-    def clean_github_url(self):
-        url = self.cleaned_data.get("github_url", "").strip()
-        if not url:
-            return url
-        if "github.com" not in url:
-            raise forms.ValidationError("Ссылка должна вести на github.com")
-        return url
 
 
 class ChangePasswordForm(forms.Form):

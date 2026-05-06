@@ -1,0 +1,19 @@
+import os
+
+from django.conf import settings
+
+GITHUB_WEBSITE = "github.com"
+DEFAULT_PAGE_CONTENT_COUNT = 12
+SKILL_NAME_MAX_LENGTH = 124
+
+AVATAR_MINIMUM_COLOR_INTENSITY = 125
+AVATAR_SIZE_PX = 128
+AVATAR_FONT_PATH = os.path.join(
+    settings.BASE_DIR, 'static', 'fonts',
+    'Neue_Haas_Grotesk_Display_Pro_75_Bold.otf'
+)
+AVATAR_LETTER_COLOR = "black"
+AVATAR_LETTER_STROKE_COLOR = "white"
+AVATAR_LETTER_STROKE_WIDTH = 3
+USER_NAME_MAX_LENGTH = 124
+USER_SURNAME_MAX_LENGTH = 124

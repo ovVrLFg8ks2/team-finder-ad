@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, Skill
+from .models import Skill, User
 
 
 @admin.register(User)
@@ -31,7 +31,7 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
     )
-    filter_horizontal = ("groups", "user_permissions")
+    filter_horizontal = ("skills", "groups", "user_permissions")
 
 
 @admin.register(Skill)

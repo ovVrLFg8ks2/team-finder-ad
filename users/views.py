@@ -1,14 +1,15 @@
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_GET, require_POST
-from django.contrib.auth import authenticate, login, logout
-from django.core.paginator import Paginator
-from django.http import JsonResponse
-from http import HTTPStatus
 import json
+from http import HTTPStatus
 
-from .forms import RegistrationForm, LoginForm, EditProfileForm, ChangePasswordForm
-from .models import User, Skill
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_GET, require_POST
+from team_finder.utils import paginate
+
+from .forms import ChangePasswordForm, EditProfileForm, LoginForm, RegistrationForm
+from .models import Skill, User
 
 
 def user_detail(request, user_id):
@@ -17,31 +18,25 @@ def user_detail(request, user_id):
 
 
 def register(request):
-    if request.method == "POST":
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("users:login")
-    else:
-        form = RegistrationForm()
+    form = RegistrationForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect("users:login")
     return render(request, "users/register.html", {"form": form})
 
 
 def login_view(request):
-    if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            user = authenticate(
-                request,
-                username=form.cleaned_data["email"],
-                password=form.cleaned_data["password"],
-            )
-            if user is not None:
-                login(request, user)
-                return redirect("users:user_detail", user_id=user.id)
-            form.add_error(None, "Неверный email или пароль")
-    else:
-        form = LoginForm()
+    form = LoginForm(request.POST or None)
+    if form.is_valid():
+        user = authenticate(
+            request,
+            username=form.cleaned_data["email"],
+            password=form.cleaned_data["password"],
+        )
+        if user is not None:
+            login(request, user)
+            return redirect("users:user_detail", user_id=user.id)
+        form.add_error(None, "Неверный email или пароль")
     return render(request, "users/login.html", {"form": form})
 
 
@@ -52,34 +47,22 @@ def logout_view(request):
 
 @login_required
 def edit_profile(request):
-    if request.method == "POST":
-        form = EditProfileForm(request.POST, request.FILES, instance=request.user)
-        if form.is_valid():
-            form.save()
-            return redirect("users:user_detail", user_id=request.user.id)
-    else:
-        form = EditProfileForm(instance=request.user)
+    form = EditProfileForm(request.POST or None, request.FILES or None, instance=request.user)
+    if form.is_valid():
+        form.save()
+        return redirect("users:user_detail", user_id=request.user.id)
     return render(request, "users/edit_profile.html", {"form": form})
 
 
 @login_required
 def change_password(request):
-    if request.method == "POST":
-        form = ChangePasswordForm(request.user, request.POST)
-        if form.is_valid():
-            request.user.set_password(form.cleaned_data["new_password1"])
-            request.user.save()
-            login(request, request.user)
-            return redirect("users:user_detail", user_id=request.user.id)
-    else:
-        form = ChangePasswordForm(request.user)
+    form = ChangePasswordForm(request.user, request.POST or None)
+    if form.is_valid():
+        request.user.set_password(form.cleaned_data["new_password1"])
+        request.user.save()
+        login(request, request.user)
+        return redirect("users:user_detail", user_id=request.user.id)
     return render(request, "users/change_password.html", {"form": form})
-
-
-def paginate(request, queryset, per_page=12):
-    paginator = Paginator(queryset, per_page)
-    page_number = request.GET.get("page")
-    return paginator.get_page(page_number)
 
 
 def user_list(request):
@@ -106,17 +89,15 @@ def user_list(request):
 
 @require_GET
 def skill_autocomplete(request):
-    q = request.GET.get("q", "").strip()
-    skills = Skill.objects.filter(name__istartswith=q).order_by("name")
+    query = request.GET.get("q", "").strip()
+    skills = Skill.objects.filter(name__istartswith=query).order_by("name")
     data = list(skills.values("id", "name"))
     return JsonResponse(data, safe=False)
 
 
 @login_required
 @require_POST
-def add_user_skill(request, user_id):
-    if request.user.pk != user_id:
-        return JsonResponse({"error": "Forbidden"}, status=HTTPStatus.FORBIDDEN)
+def add_user_skill(request):
     try:
         data = json.loads(request.body)
         skill_id = data.get("skill_id")
@@ -142,9 +123,7 @@ def add_user_skill(request, user_id):
 
 @login_required
 @require_POST
-def remove_user_skill(request, user_id, skill_id):
-    if request.user.pk != user_id:
-        return JsonResponse({"error": "Forbidden"}, status=HTTPStatus.FORBIDDEN)
+def remove_user_skill(request, skill_id):
     skill = get_object_or_404(Skill, pk=skill_id)
     if not request.user.skills.filter(pk=skill_id).exists():
         return JsonResponse({"error": "Skill not in user profile"}, status=HTTPStatus.BAD_REQUEST)

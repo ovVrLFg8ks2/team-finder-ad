@@ -1,9 +1,19 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 
 
 class Project(models.Model):
-    name = models.CharField(max_length=200)
+    STATUS_OPEN = "open"
+    STATUS_CLOSED = "closed"
+    STATUS_MAX_LENGTH = 6
+    PROJECT_NAME_MAX_LENGTH = 200
+
+    STATUS_CHOICES = [
+        (STATUS_OPEN, "Открыт"),
+        (STATUS_CLOSED, "Закрыт"),
+    ]
+
+    name = models.CharField(max_length=PROJECT_NAME_MAX_LENGTH)
     description = models.TextField(blank=True, default="")
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -12,8 +22,11 @@ class Project(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     github_url = models.URLField(blank=True, default="")
-    status_choices = [("open", "Open"), ("closed", "Closed")]
-    status = models.CharField(max_length=6, choices=status_choices, default="open")
+    status = models.CharField(
+        max_length=STATUS_MAX_LENGTH,
+        choices=STATUS_CHOICES,
+        default=STATUS_OPEN
+    )
     participants = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         blank=True,
@@ -25,3 +38,6 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return "/projects/%i/" % self.id

@@ -102,7 +102,7 @@
       if (e.target.classList.contains("remove-skill-btn")) {
         const chip = e.target.closest(".skill-chip");
         const skillId = chip.dataset.id;
-        const res = await fetch(`/users/${userId}/skills/${skillId}/remove/`, {
+        const res = await fetch(`/users/skills/${skillId}/remove/`, {
           method: "POST",
           headers: { "X-CSRFToken": getCookie("csrftoken") }
         });
@@ -113,7 +113,7 @@
     });
 
     async function addSkillById(skillId) {
-      const res = await fetch(`/users/${userId}/skills/add/`, {
+      const res = await fetch(`/users/skills/add/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,7 +128,7 @@
     }
 
     async function addSkillByName(name) {
-      const res = await fetch(`/users/${userId}/skills/add/`, {
+      const res = await fetch(`/users/skills/add/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
