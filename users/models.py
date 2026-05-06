@@ -1,8 +1,12 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-from team_finder.constants import (SKILL_NAME_MAX_LENGTH, USER_NAME_MAX_LENGTH,
-                                   USER_SURNAME_MAX_LENGTH)
+
+from team_finder.constants import (
+    SKILL_NAME_MAX_LENGTH,
+    USER_NAME_MAX_LENGTH,
+    USER_SURNAME_MAX_LENGTH,
+)
 from team_finder.utils import make_avatar
 
 from .managers import UserManager

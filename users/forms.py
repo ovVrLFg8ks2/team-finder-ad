@@ -1,7 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from phonenumber_field.widgets import RegionalPhoneNumberWidget
-from team_finder.utils import validate_github_url
+
+from team_finder.validators import validate_github_url
 
 from .models import User
 

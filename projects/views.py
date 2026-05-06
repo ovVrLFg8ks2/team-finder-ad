@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+
 from team_finder.utils import paginate
 
 from .forms import ProjectForm
@@ -56,7 +57,7 @@ def complete_project(request, project_id):
             {"status": "error", "message": "Project is not open"},
             status=HTTPStatus.BAD_REQUEST,
         )
-    project.status = "closed"
+    project.status = Project.STATUS_CLOSED
     project.save()
     return JsonResponse({"status": "ok", "project_status": "closed"})
 

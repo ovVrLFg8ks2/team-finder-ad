@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.urls import reverse
 
 
 class Project(models.Model):
@@ -40,4 +41,4 @@ class Project(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return "/projects/%i/" % self.id
+        return reverse('projects:project_detail', kwargs={'project_id': self.id})

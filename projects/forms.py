@@ -1,5 +1,6 @@
 from django import forms
-from team_finder.utils import validate_github_url
+
+from team_finder.validators import validate_github_url
 
 from .models import Project
 

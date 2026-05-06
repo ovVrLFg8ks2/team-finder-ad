@@ -1,20 +1,19 @@
 import io
 from random import randint
 
-from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.paginator import Paginator
 from PIL import Image, ImageDraw, ImageFont
 
-from .constants import (AVATAR_FONT_PATH, AVATAR_LETTER_COLOR, AVATAR_LETTER_STROKE_COLOR,
-                        AVATAR_LETTER_STROKE_WIDTH, AVATAR_MINIMUM_COLOR_INTENSITY, AVATAR_SIZE_PX,
-                        DEFAULT_PAGE_CONTENT_COUNT, GITHUB_WEBSITE)
-
-
-def validate_github_url(value):
-    url = value.strip()
-    if url and GITHUB_WEBSITE not in url:
-        raise ValidationError(f"Ссылка должна вести на {GITHUB_WEBSITE}")
+from .constants import (
+    AVATAR_FONT_PATH,
+    AVATAR_LETTER_COLOR,
+    AVATAR_LETTER_STROKE_COLOR,
+    AVATAR_LETTER_STROKE_WIDTH,
+    AVATAR_MINIMUM_COLOR_INTENSITY,
+    AVATAR_SIZE_PX,
+    DEFAULT_PAGE_CONTENT_COUNT,
+)
 
 
 def paginate(request, queryset, per_page=DEFAULT_PAGE_CONTENT_COUNT):
