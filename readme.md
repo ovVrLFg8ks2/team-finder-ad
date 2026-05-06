@@ -104,5 +104,5 @@ docker compose down
 ```bash
 python manage.py runserver
 ```
-### Автор
+## Автор
 ovVrLFg8ks2: https://github.com/ovVrLFg8ks2
